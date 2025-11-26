@@ -22,11 +22,11 @@
             </StackPanel>
             <StackPanel Margin="3px" >
                 <Label Content="Korhatár:" />
-                <TextBox x:Name="cb_korhatar" Width="200px"/>
+                <ComboBox x:Name="cb_korhatar" Width="200px"/>
             </StackPanel>
             <StackPanel Margin="3px" >
                 <Label Content="Műfaj:" />
-                <TextBox x:Name="cb_mufaj" Width="200px"/>
+                <ComboBox x:Name="cb_mufaj" Width="200px"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="3px">
                 <Button x:Name="btn_Hozzaad" Content="Hozzáad" Margin="3px" Width="80px" Click="btn_Hozzaad_Click" />
