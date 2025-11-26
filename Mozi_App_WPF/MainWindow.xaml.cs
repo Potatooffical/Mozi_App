@@ -15,6 +15,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+
 namespace Mozi_App_WPF
 {
     /// <summary>
@@ -25,12 +26,83 @@ namespace Mozi_App_WPF
         //======Globális változok=======
         int Selecteditem;
         private readonly string connectionstring = "server=localhost;user=root;password=;database=mozi";
+        //======mufajlista feltoltese======
+        List<string> mufajlista = new List<string>() {"kérem válasszon" };
+        //======korhatarlista es feltoltese======
+        List<string> korhatarlista = new List<string>() { "kérem válasszon"};
         //======Fő ablak=======
         public MainWindow()
         {
             InitializeComponent();
+            
+            Korhatarhozzaad();
+            Mufajlistahozzaad();
+            cb_mufaj.ItemsSource = mufajlista;
+            cb_korhatar.ItemsSource = korhatarlista;
+
+            cb_mufaj.SelectedIndex = 0;
+            cb_korhatar.SelectedIndex = 0;
+
             Adatbetolt();
         }
+        //======Korhatarhozzaad======
+        private void Korhatarhozzaad()
+        {
+            using (MySqlConnection conn = new MySqlConnection(connectionstring))
+            {
+                try
+                {
+                    conn.Open();
+                    string sql = "SELECT DISTINCT korhatar FROM filmek";
+                    MySqlCommand cmd = new MySqlCommand(sql, conn);
+                    MySqlDataAdapter adapter = new MySqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    adapter.Fill(dt);
+
+                    // A listához adjuk hozzá, nem a ComboBoxhoz
+                    foreach (DataRow row in dt.Rows)
+                    {
+                        korhatarlista.Add(row["korhatar"].ToString());
+                    }
+
+                    conn.Close();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Adatbázis hiba vagy inaktiv a szerver \n" + ex.Message,
+                                    "Hiba", MessageBoxButton.OKCancel, MessageBoxImage.Error);
+                }
+            }
+        }
+        //======Mufajhozzaad======
+        private void Mufajlistahozzaad()
+        {
+            using (MySqlConnection conn = new MySqlConnection(connectionstring))
+            {
+                try
+                {
+                    conn.Open();
+                    string sql = "SELECT DISTINCT mufaj FROM filmek";
+                    MySqlCommand cmd = new MySqlCommand(sql, conn);
+                    MySqlDataAdapter adapter = new MySqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    adapter.Fill(dt);
+
+                    foreach (DataRow row in dt.Rows)
+                    {
+                        mufajlista.Add(row["mufaj"].ToString());
+                    }
+
+                    conn.Close();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Adatbázis hiba vagy inaktiv a szerver \n" + ex.Message,
+                                    "Hiba", MessageBoxButton.OKCancel, MessageBoxImage.Error);
+                }
+            }
+        }
+
         //======Adatbetöltése=======
         private void Adatbetolt()
         {
@@ -57,43 +129,52 @@ namespace Mozi_App_WPF
         //======Adahozzáadása=======
         private void btn_Hozzaad_Click(object sender, RoutedEventArgs e)
         {
-            try
+            if (cb_korhatar.SelectedIndex!=0 && cb_mufaj.SelectedIndex!=0)
             {
-                using (MySqlConnection conn = new MySqlConnection(connectionstring))
+                try
                 {
-                    conn.Open();
-
-                    string cim = tbx_cim.Text;
-                    if (!int.TryParse(tbx_hossz.Text, out int hossz))
+                    using (MySqlConnection conn = new MySqlConnection(connectionstring))
                     {
-                        MessageBox.Show("Hossz csak szám lehet!");
-                        return;
-                    }
-                    if (!int.TryParse(cb_korhatar.Text, out int korhatar))
-                    {
-                        MessageBox.Show("Korhatár csak szám lehet!");
-                        return;
-                    }
-                    string mufaj = cb_mufaj.Text;
+                        conn.Open();
 
-                    string sql = "INSERT INTO filmek (cim, hossz, korhatar, mufaj) VALUES (@cim, @hossz, @korhatar, @mufaj)";
-                    using (MySqlCommand cmd = new MySqlCommand(sql, conn))
-                    {
-                        cmd.Parameters.AddWithValue("@cim", cim);
-                        cmd.Parameters.AddWithValue("@hossz", hossz);
-                        cmd.Parameters.AddWithValue("@korhatar", korhatar);
-                        cmd.Parameters.AddWithValue("@mufaj", mufaj);
+                        string cim = tbx_cim.Text;
+                        if (!int.TryParse(tbx_hossz.Text, out int hossz))
+                        {
+                            MessageBox.Show("Hossz csak szám lehet!");
+                            return;
+                        }
+                        string korhatar = cb_korhatar.SelectedItem.ToString();
+                        string mufaj = cb_mufaj.SelectedItem.ToString();
 
-                        int rows = cmd.ExecuteNonQuery();
-                        MessageBox.Show(rows > 0 ? "Sikeres hozzáadás!" : "Nem sikerült hozzáadni.");
+
+                        string sql = "INSERT INTO filmek (cim, hossz, korhatar, mufaj) VALUES (@cim, @hossz, @korhatar, @mufaj)";
+                        using (MySqlCommand cmd = new MySqlCommand(sql, conn))
+                        {
+                            cmd.Parameters.AddWithValue("@cim", cim);
+                            cmd.Parameters.AddWithValue("@hossz", hossz);
+                            cmd.Parameters.AddWithValue("@korhatar", korhatar);
+                            cmd.Parameters.AddWithValue("@mufaj", mufaj);
+
+                            int rows = cmd.ExecuteNonQuery();
+                            MessageBox.Show(rows > 0 ? "Sikeres hozzáadás!" : "Nem sikerült hozzáadni.");
+                        }
+                        rb_Osszes.IsChecked = false;
+                        rb_hatev.IsChecked = false;
+                        rb_tizenkettoev.IsChecked = false;
+                        rb_tizenhatev.IsChecked = false;
+                        rb_tizennyolcev.IsChecked = false;
+                        Adatbetolt();
                     }
-                    Adatbetolt();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Adatbázis hiba vagy inaktív a szerver \n" + ex.Message,
+                                    "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
-            catch (Exception ex)
+            else
             {
-                MessageBox.Show("Adatbázis hiba vagy inaktív a szerver \n" + ex.Message,
-                                "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Hiányos adatok!","Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
         //======Adattörlése=======
@@ -126,7 +207,11 @@ namespace Mozi_App_WPF
                             int rows = cmd.ExecuteNonQuery();
                             MessageBox.Show(rows > 0 ? "Sikeres törlés!" : "Nem sikerült törölni.");
                         }
-
+                        rb_Osszes.IsChecked = false;
+                        rb_hatev.IsChecked = false;
+                        rb_tizenkettoev.IsChecked = false;
+                        rb_tizenhatev.IsChecked = false;
+                        rb_tizennyolcev.IsChecked = false;
                         Adatbetolt();
                     }
                     catch (Exception ex)
@@ -144,62 +229,69 @@ namespace Mozi_App_WPF
             int.TryParse(sor["id"].ToString(), out Selecteditem);
             tbx_cim.Text = sor["cim"].ToString();
             tbx_hossz.Text = sor["Hossz"].ToString();
-            cb_korhatar.Text = sor["korhatar"].ToString();
-            cb_mufaj.Text = sor["mufaj"].ToString();
+            cb_korhatar.SelectedItem = sor["korhatar"].ToString();
+            cb_mufaj.SelectedItem = sor["mufaj"].ToString();
         }
         //======Adat módositása=======
         private void btn_Modosit_Click(object sender, RoutedEventArgs e)
         {
-            if (Selecteditem == -1)
+            if (cb_korhatar.SelectedIndex != 0 && cb_mufaj.SelectedIndex != 0)
             {
-                MessageBox.Show("Nincs kiválasztva adat :|");
-                return;
-            }
-            var eredmeny = MessageBox.Show("Biztosan akkarod módositani a sort?", "Modósitás", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
-            if (eredmeny != MessageBoxResult.OK)
-            {
-                MessageBox.Show("nem történt változás");
-                return;
+                if (Selecteditem == -1)
+                {
+                    MessageBox.Show("Nincs kiválasztva adat :|");
+                    return;
+                }
+                var eredmeny = MessageBox.Show("Biztosan akkarod módositani a sort?", "Modósitás", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                if (eredmeny != MessageBoxResult.OK)
+                {
+                    MessageBox.Show("nem történt változás");
+                    return;
+                }
+                else
+                {
+                    using (MySqlConnection conn = new MySqlConnection(connectionstring))
+                    {
+                        try
+                        {
+                            conn.Open();
+                            string cim = tbx_cim.Text;
+                            if (!int.TryParse(tbx_hossz.Text, out int hossz))
+                            {
+                                MessageBox.Show("Hossz csak szám lehet!");
+                                return;
+                            }
+                            string korhatar = cb_korhatar.SelectedItem.ToString();
+                            string mufaj = cb_mufaj.SelectedItem.ToString();
+                            string sql = "update filmek set cim=@cim,hossz=@hossz,korhatar=@korhatar,mufaj=@mufaj where id=@id ";
+                            using (MySqlCommand cmd = new MySqlCommand(sql, conn))
+                            {
+                                cmd.Parameters.AddWithValue("@cim", cim);
+                                cmd.Parameters.AddWithValue("@hossz", hossz);
+                                cmd.Parameters.AddWithValue("@korhatar", korhatar);
+                                cmd.Parameters.AddWithValue("@mufaj", mufaj);
+                                cmd.Parameters.AddWithValue("@id", Selecteditem);
+
+                                int rows = cmd.ExecuteNonQuery();
+                                MessageBox.Show(rows > 0 ? "Sikeres módositani!" : "Nem sikerült módositás.");
+                            }
+                            rb_Osszes.IsChecked = false;
+                            rb_hatev.IsChecked = false;
+                            rb_tizenkettoev.IsChecked = false;
+                            rb_tizenhatev.IsChecked = false;
+                            rb_tizennyolcev.IsChecked = false;
+                            Adatbetolt();
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show("Adatbázis hiba történt!\n" + ex.Message);
+                        }
+                    }
+                }
             }
             else
             {
-                using (MySqlConnection conn = new MySqlConnection(connectionstring))
-                {
-                    try
-                    {
-                        conn.Open();
-                        string cim = tbx_cim.Text;
-                        if (!int.TryParse(tbx_hossz.Text, out int hossz))
-                        {
-                            MessageBox.Show("Hossz csak szám lehet!");
-                            return;
-                        }
-                        if (!int.TryParse(cb_korhatar.Text, out int korhatar))
-                        {
-                            MessageBox.Show("Korhatár csak szám lehet!");
-                            return;
-                        }
-                        string mufaj = cb_mufaj.Text;
-                        string sql = "update filmek set cim=@cim,hossz=@hossz,korhatar=@korhatar,mufaj=@mufaj where id=@id ";
-                        using (MySqlCommand cmd = new MySqlCommand(sql, conn))
-                        {
-                            cmd.Parameters.AddWithValue("@cim", cim);
-                            cmd.Parameters.AddWithValue("@hossz", hossz);
-                            cmd.Parameters.AddWithValue("@korhatar", korhatar);
-                            cmd.Parameters.AddWithValue("@mufaj", mufaj);
-                            cmd.Parameters.AddWithValue("@id", Selecteditem);
-
-                            int rows = cmd.ExecuteNonQuery();
-                            MessageBox.Show(rows > 0 ? "Sikeres módositani!" : "Nem sikerült módositás.");
-                        }
-
-                        Adatbetolt();
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show("Adatbázis hiba történt!\n" + ex.Message);
-                    }
-                }
+                MessageBox.Show("Hiányos adatok!", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
         //======Frissités======
@@ -207,8 +299,8 @@ namespace Mozi_App_WPF
         {
             tbx_cim.Text = "";
             tbx_hossz.Text = "";
-            cb_korhatar.Text = "";
-            cb_mufaj.Text = "";
+            cb_korhatar.SelectedItem = 0;
+            cb_mufaj.SelectedItem = 0;
             rb_Osszes.IsChecked = false;
             rb_hatev.IsChecked = false;
             rb_tizenkettoev.IsChecked = false;
