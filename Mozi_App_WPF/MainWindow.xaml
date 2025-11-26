@@ -1,0 +1,52 @@
+﻿<Window x:Class="Mozi_App_WPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Mozi_App_WPF"
+        mc:Ignorable="d"
+        Title="Mozi Alkalmazás" Height="493" Width="886" Margin="5px" MinHeight="400" MinWidth="570">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Orientation="Vertical">
+            <StackPanel Margin="3px">
+                <Label Content="Cím:" />
+                <TextBox x:Name="tbx_cim" Width="200px"/>
+            </StackPanel>
+            <StackPanel Margin="3px">
+                <Label Content="Hossz (Perc):" />
+                <TextBox x:Name="tbx_hossz" Width="200px"/>
+            </StackPanel>
+            <StackPanel Margin="3px" >
+                <Label Content="Korhatár:" />
+                <TextBox x:Name="cb_korhatar" Width="200px"/>
+            </StackPanel>
+            <StackPanel Margin="3px" >
+                <Label Content="Műfaj:" />
+                <TextBox x:Name="cb_mufaj" Width="200px"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="3px">
+                <Button x:Name="btn_Hozzaad" Content="Hozzáad" Margin="3px" Width="80px" Click="btn_Hozzaad_Click" />
+                <Button x:Name="btn_Modosit" Content="Módosit" Margin="3px" Width="80px" Click="btn_Modosit_Click" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="3px">
+                <Button x:Name="btn_Torol" Content="Törlés" Margin="3px" Width="80px" Click="btn_Torol_Click" />
+                <Button x:Name="btn_Frissites" Content="Frissités" Margin="3px" Width="80px" Click="btn_Frissites_Click" />
+            </StackPanel>
+            <Separator Margin="3px"/>
+            <StackPanel Margin="3px">
+                <Label Content="Szűrés korhatár szerint:"/>
+                <RadioButton x:Name="rb_Osszes" Content="Ősszes" Checked="rb_Osszes_Checked"/>
+                <RadioButton x:Name="rb_kn" Content="KN" Checked="rb_Osszes_Checked"/>
+                <RadioButton x:Name="rb_hatev" Content="6" Checked="rb_Osszes_Checked"/>
+                <RadioButton x:Name="rb_tizenkettoev" Content="12" Checked="rb_Osszes_Checked"/>
+                <RadioButton x:Name="rb_tizenhatev" Content="16" Checked="rb_Osszes_Checked"/>
+                <RadioButton x:Name="rb_tizennyolcev" Content="18" Checked="rb_Osszes_Checked"/>
+            </StackPanel>
+        </StackPanel>
+        <DataGrid  x:Name="dg_tablazat" IsReadOnly="True" Grid.Column="1" SelectionChanged="dg_tablazat_SelectionChanged" Margin="5px"></DataGrid>
+    </Grid>
+</Window>
