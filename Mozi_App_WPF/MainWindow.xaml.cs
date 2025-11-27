@@ -27,14 +27,14 @@ namespace Mozi_App_WPF
         int Selecteditem;
         private readonly string connectionstring = "server=localhost;user=root;password=;database=mozi";
         //======mufajlista feltoltese======
-        List<string> mufajlista = new List<string>() {"kérem válasszon" };
+        List<string> mufajlista = new List<string>() { "kérem válasszon" };
         //======korhatarlista es feltoltese======
-        List<string> korhatarlista = new List<string>() { "kérem válasszon"};
+        List<string> korhatarlista = new List<string>() { "kérem válasszon" };
         //======Fő ablak=======
         public MainWindow()
         {
             InitializeComponent();
-            
+
             Korhatarhozzaad();
             Mufajlistahozzaad();
             cb_mufaj.ItemsSource = mufajlista;
@@ -129,7 +129,7 @@ namespace Mozi_App_WPF
         //======Adahozzáadása=======
         private void btn_Hozzaad_Click(object sender, RoutedEventArgs e)
         {
-            if (cb_korhatar.SelectedIndex!=0 && cb_mufaj.SelectedIndex!=0)
+            if (cb_korhatar.SelectedIndex != 0 && cb_mufaj.SelectedIndex != 0)
             {
                 try
                 {
@@ -142,6 +142,10 @@ namespace Mozi_App_WPF
                         {
                             MessageBox.Show("Hossz csak szám lehet!");
                             return;
+                        }
+                        else if (int.TryParse(tbx_hossz.Text, out hossz) && hossz >= 1000)
+                        {
+                            MessageBox.Show("Nagyon hosszú a film!");
                         }
                         string korhatar = cb_korhatar.SelectedItem.ToString();
                         string mufaj = cb_mufaj.SelectedItem.ToString();
@@ -156,7 +160,7 @@ namespace Mozi_App_WPF
                             cmd.Parameters.AddWithValue("@mufaj", mufaj);
 
                             int rows = cmd.ExecuteNonQuery();
-                            MessageBox.Show(rows > 0 ? "Sikeres hozzáadás!" : "Nem sikerült hozzáadni.");
+                            //MessageBox.Show(rows > 0 ? "Sikeres hozzáadás!" : "Nem sikerült hozzáadni.");
                         }
                         rb_Osszes.IsChecked = false;
                         rb_hatev.IsChecked = false;
@@ -174,7 +178,7 @@ namespace Mozi_App_WPF
             }
             else
             {
-                MessageBox.Show("Hiányos adatok!","Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Hiányos adatok!", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
         //======Adattörlése=======
@@ -237,6 +241,8 @@ namespace Mozi_App_WPF
         {
             if (cb_korhatar.SelectedIndex != 0 && cb_mufaj.SelectedIndex != 0)
             {
+
+
                 if (Selecteditem == -1)
                 {
                     MessageBox.Show("Nincs kiválasztva adat :|");
@@ -248,6 +254,7 @@ namespace Mozi_App_WPF
                     MessageBox.Show("nem történt változás");
                     return;
                 }
+                
                 else
                 {
                     using (MySqlConnection conn = new MySqlConnection(connectionstring))
@@ -260,6 +267,10 @@ namespace Mozi_App_WPF
                             {
                                 MessageBox.Show("Hossz csak szám lehet!");
                                 return;
+                            }
+                            else if (int.TryParse(tbx_hossz.Text, out  hossz) && hossz >= 1000)
+                            {
+                                MessageBox.Show("Nagyon hosszú a film!");
                             }
                             string korhatar = cb_korhatar.SelectedItem.ToString();
                             string mufaj = cb_mufaj.SelectedItem.ToString();
@@ -288,6 +299,7 @@ namespace Mozi_App_WPF
                         }
                     }
                 }
+
             }
             else
             {
